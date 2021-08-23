@@ -44,6 +44,7 @@ class SnakeView:
             self.draw_board()
             self.draw_fruit()
             self.draw_player()
+        self.window.update()
 
     def start_rendering(self):
         self.draw_game()

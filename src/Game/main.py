@@ -6,5 +6,6 @@ sm = SnakeModel()
 sv = SnakeView(sm)
 sc = SnakeController(sm, sv)
 
-sm.start_new_game()
+sm.reset()
+sm.start_game()
 sv.start_rendering()

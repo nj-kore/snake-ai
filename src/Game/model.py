@@ -29,7 +29,7 @@ class SnakeModel:
 
         self.game_loop_observable = Observable()
 
-    def start_new_game(self):
+    def reset(self):
         self.player_start = [0, 0]
         self.player_body = deque([[0, 1]])
         self.player_head = self.player_start
@@ -44,7 +44,6 @@ class SnakeModel:
         # -1 = player has died,   1 = player has won,   0 = non terminal state
         self.game_status = 0
         self.randomise_fruit()
-        self.game_loop()
 
     def move_player(self):
         old_player_head = copy.deepcopy(self.player_head)
@@ -103,12 +102,19 @@ class SnakeModel:
 
         self.fruit = list(free_tiles.values())[random.randint(0, len(free_tiles) - 1)]
 
-    def game_loop(self):
+    def step(self):
         self.game_loop_itr += 1
         self.lock_in_direction()
         self.move_player()
         self.game_status = self.termination_check()
         self.game_loop_observable.notify()
+
+
+    def game_loop(self):
+        self.step()
         if self.game_status == 0:
             threading.Timer(self.game_tick_seconds, self.game_loop).start()
 
+
+    def start_game(self):
+        self.game_loop()
