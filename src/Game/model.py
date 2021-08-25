@@ -10,9 +10,9 @@ def tile_to_key(tile):
 
 
 class SnakeModel:
-    def __init__(self):
-        self.grid_width = 8
-        self.grid_height = 8
+    def __init__(self, grid_width, grid_height):
+        self.grid_width = grid_width
+        self.grid_height = grid_height
         self.grid_tiles = self.grid_width * self.grid_height
         self.game_tick_seconds = 0.15
 
@@ -30,8 +30,8 @@ class SnakeModel:
         self.game_loop_observable = Observable()
 
     def reset(self):
-        self.player_start = [0, 0]
-        self.player_body = deque([[0, 1]])
+        self.player_start = [0, 1]
+        self.player_body = deque([[0, 0]])
         self.player_head = self.player_start
 
         # 0 = up, 1 = left, 2 = down, 3 = right
@@ -44,6 +44,9 @@ class SnakeModel:
         # -1 = player has died,   1 = player has won,   0 = non terminal state
         self.game_status = 0
         self.randomise_fruit()
+
+        # This is here to notify listeners of the initial state of the board, such as the view so it can draw it
+        self.game_loop_observable.notify()
 
     def move_player(self):
         old_player_head = copy.deepcopy(self.player_head)
@@ -117,4 +120,4 @@ class SnakeModel:
 
 
     def start_game(self):
-        self.game_loop()
+        threading.Timer(self.game_tick_seconds, self.game_loop).start()

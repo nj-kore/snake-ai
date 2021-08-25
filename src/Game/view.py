@@ -71,7 +71,7 @@ class SnakeView:
             self.tile_frames[body_piece[0] + 1][body_piece[1] + 1].config(bg='green')
 
         # draw head
-        self.tile_frames[self.sm.player_head[0] + 1][self.sm.player_head[1] + 1].config(bg='green')
+        self.tile_frames[self.sm.player_head[0] + 1][self.sm.player_head[1] + 1].config(bg='blue')
 
     def draw_fruit(self):
         self.tile_frames[self.sm.fruit[0] + 1][self.sm.fruit[1] + 1].config(bg='purple')
