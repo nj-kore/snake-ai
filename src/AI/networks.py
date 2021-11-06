@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -28,22 +29,35 @@ class Net(nn.Module):
             nn.Linear((width - 4) * (height - 4), 64),
             nn.ReLU(),
             nn.Linear(64, 1),
-            nn.Tanh()
         )
 
-        self.actor_head = nn.Sequential(
+        self.action_head = nn.Sequential(
             nn.Conv2d(32, 2, kernel_size=(1, 1)),
             nn.BatchNorm2d(2),
             nn.ReLU(),
             nn.Flatten(),
             nn.Linear(2 * (width - 4) * (height - 4), outputs),
-            nn.Softmax(dim=-1)
         )
 
+        # initialization function, first checks the module type,
+        # then applies the desired changes to the weights
+        def init_normal(m):
+            if type(m) == nn.Linear:
+                nn.init.uniform_(m.weight)
+
+        # use the modules apply function to recursively apply the initialization
+        self.conv_sequential.apply(init_normal)
+        self.value_head.apply(init_normal)
+        self.action_head.apply(init_normal)
+
     def forward(self, x):
+        #print("Before", x)
         x = self.conv_sequential(x)
-        action_prob = self.actor_head(x)
-        state_value = self.value_head(x)
+        #print("After", x)
+        action_prob = F.softmax(self.action_head(x), dim=-1)
+        state_value = torch.tanh(self.value_head(x))
+        #print(action_prob)
+        #print(state_value)
         return action_prob, state_value
 
 

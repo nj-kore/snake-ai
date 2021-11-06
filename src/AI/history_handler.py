@@ -18,7 +18,7 @@ class HistoryHandler:
         self.done_history.append(done)
 
         self.current_length += 1
-        if self.current_length > self.max_length:
+        if self.max_length is not None and self.current_length > self.max_length:
             self.current_length -= 1
             self.state_history.pop(0)
             self.action_history.pop(0)
