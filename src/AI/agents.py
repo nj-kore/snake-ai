@@ -39,10 +39,15 @@ class A2CAgent(BaseAgent):
         #self.history_handler = HistoryHandler(max_length=None)
         self.saved_actions = []
         self.saved_rewards = []
+        self.reward_timer = 0
 
     def observe(self, observation, reward, done):
+        if reward > 0:
+            self.reward_timer = 0
+
         self.saved_rewards.append(reward)
         if done:
+            self.reward_timer = 0
             self.finish_episode()
 
 
@@ -55,6 +60,10 @@ class A2CAgent(BaseAgent):
 
         # and sample an action using the distribution
         action = m.sample()
+
+        self.reward_timer += 1
+        if self.reward_timer >= 100:
+            action = torch.tensor([0])
 
         self.saved_actions.append(SavedAction(m.log_prob(action), state_value))
 
@@ -80,7 +89,10 @@ class A2CAgent(BaseAgent):
             returns.insert(0, R)
 
         returns = torch.tensor(returns)
-        returns = (returns - returns.mean()) / (returns.std() + eps)
+        if len(self.saved_rewards) == 1:
+            returns = (returns - returns.mean())
+        else:
+            returns = (returns - returns.mean()) / (returns.std() + eps)
 
         for (log_prob, value), R in zip(saved_actions, returns):
             advantage = R - value.item()
@@ -95,7 +107,6 @@ class A2CAgent(BaseAgent):
 
         # sum up all the values of policy_losses and value_losses
         loss = torch.stack(policy_losses).sum() + torch.stack(value_losses).sum()
-
         # perform backprop
         loss.backward()
         self.optimizer.step()

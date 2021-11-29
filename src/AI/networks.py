@@ -46,9 +46,10 @@ class Net(nn.Module):
                 nn.init.uniform_(m.weight)
 
         # use the modules apply function to recursively apply the initialization
-        self.conv_sequential.apply(init_normal)
-        self.value_head.apply(init_normal)
-        self.action_head.apply(init_normal)
+        #self.conv_sequential.apply(init_normal)
+        #self.value_head.apply(init_normal)
+        #self.action_head.apply(init_normal)
+
 
     def forward(self, x):
         #print("Before", x)
