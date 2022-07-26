@@ -18,13 +18,13 @@ eps = np.finfo(np.float32).eps.item()
 
 SavedAction = namedtuple('SavedAction', ['log_prob', 'value'])
 
+
 class BaseAgent:
     def observe(self, observation, reward, done):
         pass
 
     def act(self, observation):
         return 0
-
 
 
 class A2CAgent(BaseAgent):
@@ -36,7 +36,7 @@ class A2CAgent(BaseAgent):
         self.prev_action = None
         self.net = Net(input_space, action_space)
         self.optimizer = torch.optim.Adam(self.net.parameters(), lr=lr)
-        #self.history_handler = HistoryHandler(max_length=None)
+        # self.history_handler = HistoryHandler(max_length=None)
         self.saved_actions = []
         self.saved_rewards = []
         self.reward_timer = 0
@@ -50,10 +50,9 @@ class A2CAgent(BaseAgent):
             self.reward_timer = 0
             self.finish_episode()
 
-
     def act(self, observation):
         state = observation
-        #print(state)
+        # print(state)
         probs, state_value = self.net(state)
         # create a categorical distribution over the list of probabilities of actions
         m = Categorical(probs)
@@ -119,9 +118,3 @@ class A2CAgent(BaseAgent):
     def get_history_handler(self):
         return self.history_handler
     """
-
-
-
-
-
-

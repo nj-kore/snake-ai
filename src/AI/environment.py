@@ -1,19 +1,22 @@
-from Game import model, view
+#from .. import Game
+from Game.model import SnakeModel
+from Game.view import SnakeView
 import torch
 
 BODY_PLANE = 0
 HEAD_PLANE = 1
 FRUIT_PLANE = 2
 
+
 class Environment:
     def __init__(self, grid_width, grid_height, render=False):
-        self.game_model = model.SnakeModel(grid_width, grid_height)
+        self.game_model = SnakeModel(grid_width, grid_height)
         self.state_space = [3, self.game_model.grid_width + 2, self.game_model.grid_height + 2]
         self.action_space = 4
         self.render = render
 
         if render:
-            self.game_view = view.SnakeView(self.game_model)
+            self.game_view = SnakeView(self.game_model)
 
     def step(self, action):
         self.game_model.change_direction(action)
@@ -27,10 +30,9 @@ class Environment:
 
     def reset(self):
         self.game_model.reset()
-        #if self.render:
-            #self.game_view.draw_game()
+        # if self.render:
+        # self.game_view.draw_game()
         return self.extract_state(self.game_model)
-
 
     def extract_state(self, game_model):
         player_body = list(game_model.player_body)
@@ -54,10 +56,9 @@ class RewardData:
 
 
 def calculate_reward(data_before: RewardData, data_after: RewardData):
-    if data_after.game_status == -1:
+    if data_after.game_status == -1 and data_after.snake_length == 1:
         return -1
     return data_after.snake_length - data_before.snake_length
-
 
 
 def extract_reward_data(game_model):

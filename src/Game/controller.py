@@ -1,7 +1,14 @@
-keycode_up = 87  # w
-keycode_left = 65  # a
-keycode_down = 83  # s
-keycode_right = 68  # d
+# Windows
+# keycode_up = 87  # w
+# keycode_left = 65  # a
+# keycode_down = 83  # s
+# keycode_right = 68  # d
+
+# Linux
+keycode_up = 25  # w
+keycode_left = 38  # a
+keycode_down = 39  # s
+keycode_right = 40  # d
 
 
 class SnakeController:
