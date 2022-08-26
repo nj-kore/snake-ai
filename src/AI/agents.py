@@ -28,18 +28,23 @@ class BaseAgent:
 
 
 class A2CAgent(BaseAgent):
-    def __init__(self, input_space, action_space, gamma, lr):
+    def __init__(self, input_space, action_space, gamma, lr, train=True):
         self.t = 0
         self.input_space = input_space
         self.gamma = gamma
         self.prev_state = None
         self.prev_action = None
-        self.net = Net(input_space, action_space)
-        self.optimizer = torch.optim.Adam(self.net.parameters(), lr=lr)
+        self.model = Net(input_space, action_space)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
         # self.history_handler = HistoryHandler(max_length=None)
         self.saved_actions = []
         self.saved_rewards = []
         self.reward_timer = 0
+        self.reward_timer_threshold = 100
+        self.train = train
+        if not self.train:
+            # Arbitrary big value
+            self.reward_timer_threshold = 1e7
 
     def observe(self, observation, reward, done):
         if reward > 0:
@@ -48,12 +53,16 @@ class A2CAgent(BaseAgent):
         self.saved_rewards.append(reward)
         if done:
             self.reward_timer = 0
-            self.finish_episode()
+            if self.train:
+                self.finish_episode()
+            # reset rewards and action buffer
+            del self.saved_rewards[:]
+            del self.saved_actions[:]
 
     def act(self, observation):
         state = observation
         # print(state)
-        probs, state_value = self.net(state)
+        probs, state_value = self.model(state)
         # create a categorical distribution over the list of probabilities of actions
         m = Categorical(probs)
 
@@ -61,7 +70,7 @@ class A2CAgent(BaseAgent):
         action = m.sample()
 
         self.reward_timer += 1
-        if self.reward_timer >= 100:
+        if self.reward_timer >= self.reward_timer_threshold:
             action = torch.tensor([0])
 
         self.saved_actions.append(SavedAction(m.log_prob(action), state_value))
@@ -110,9 +119,14 @@ class A2CAgent(BaseAgent):
         loss.backward()
         self.optimizer.step()
 
-        # reset rewards and action buffer
-        del self.saved_rewards[:]
-        del self.saved_actions[:]
+
+    def save_model(self, path):
+        # Save parameters of ML model
+        torch.save(self.model.state_dict(), path)
+
+    def load_model(self, path):
+        # Load parameters of ML model
+        self.model.load_state_dict(torch.load(path))
 
     """
     def get_history_handler(self):

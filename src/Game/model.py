@@ -110,14 +110,15 @@ class SnakeModel:
         self.lock_in_direction()
         self.move_player()
         self.game_status = self.termination_check()
+        # Used to keep restarting the game once the player dies
+        # if self.game_status == -1:
+        #    self.reset()
         self.game_loop_observable.notify()
-
 
     def game_loop(self):
         self.step()
         if self.game_status == 0:
             threading.Timer(self.game_tick_seconds, self.game_loop).start()
-
 
     def start_game(self):
         threading.Timer(self.game_tick_seconds, self.game_loop).start()

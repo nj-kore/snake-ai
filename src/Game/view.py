@@ -20,7 +20,9 @@ class SnakeView:
 
         self.tile_frames = [[tk.Frame() for w in range(self.sm.grid_width + 2)] for h in range(self.sm.grid_height + 2)]
         self.init_tile_frames()
-        self.sm.game_loop_observable.subscribe(self.draw_game)
+
+        # Subscribe self.draw_game to the model, so that the model calls when the view should make updates
+        self.game_loop_observable_unsubscribe = self.sm.game_loop_observable.subscribe(self.draw_game)
         self.draw_border()
 
     def init_tile_frames(self):
@@ -49,6 +51,11 @@ class SnakeView:
     def start_rendering(self):
         self.draw_game()
         self.window.mainloop()
+
+    def kill_view(self):
+        self.game_loop_observable_unsubscribe()
+        self.window.destroy()
+
 
     # sets all board pieces to black
     def draw_board(self):
